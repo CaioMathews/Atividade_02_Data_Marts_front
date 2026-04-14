@@ -1,16 +1,11 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useProdutos } from '../../hooks/useProdutos'
 import { useUsuarioAtual } from '../../hooks/useUsuarioAtual'
 import { useCategorias } from '../../hooks/useCategorias'
-import type { Produto } from '../../types'
 
 const formatarCategoria = (cat: string) =>
   cat.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())
-
-interface ItemCarrinho extends Produto {
-  quantidade: number
-}
 
 const LIMITE = 30
 
@@ -27,9 +22,6 @@ export function Home() {
 
   const [menuAberto, setMenuAberto] = useState(false)
   const [megaMenuAberto, setMegaMenuAberto] = useState(false)
-  const [carrinhoAberto, setCarrinhoAberto] = useState(false)
-  const [carrinho, setCarrinho] = useState<ItemCarrinho[]>([])
-  const [feedbackId, setFeedbackId] = useState<string | null>(null)
 
   const { categoriasAgrupadas } = useCategorias()
 
@@ -51,32 +43,6 @@ export function Home() {
   )
 
   const totalPaginas = Math.ceil(total / LIMITE)
-
-  const adicionarAoCarrinho = useCallback((produto: Produto) => {
-    setCarrinho((prev) => {
-      const existe = prev.find((i) => i.id_produto === produto.id_produto)
-      if (existe) {
-        return prev.map((i) =>
-          i.id_produto === produto.id_produto ? { ...i, quantidade: i.quantidade + 1 } : i,
-        )
-      }
-      return [...prev, { ...produto, quantidade: 1 }]
-    })
-    setFeedbackId(produto.id_produto)
-    setTimeout(() => setFeedbackId(null), 1500)
-  }, [])
-
-  const removerDoCarrinho = (id: string) =>
-    setCarrinho((prev) => prev.filter((i) => i.id_produto !== id))
-
-  const alterarQuantidade = (id: string, delta: number) =>
-    setCarrinho((prev) =>
-      prev
-        .map((i) => (i.id_produto === id ? { ...i, quantidade: i.quantidade + delta } : i))
-        .filter((i) => i.quantidade > 0),
-    )
-
-  const totalItens = carrinho.reduce((acc, i) => acc + i.quantidade, 0)
 
   const logout = () => {
     localStorage.removeItem('token')
@@ -153,55 +119,6 @@ export function Home() {
         </div>
 
         <div className="flex-1 overflow-y-auto px-4 py-5 flex flex-col gap-6">
-
-          {/* Carrinho */}
-          <div>
-            <button
-              onClick={() => setCarrinhoAberto(!carrinhoAberto)}
-              className="flex items-center justify-between w-full px-3 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition"
-            >
-              <div className="flex items-center gap-3 text-gray-700 dark:text-gray-300 font-medium text-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1.5 6h13M10 19a1 1 0 100 2 1 1 0 000-2zm7 0a1 1 0 100 2 1 1 0 000-2z" />
-                </svg>
-                Carrinho
-              </div>
-              {totalItens > 0 && (
-                <span className="text-xs bg-gray-900 dark:bg-white dark:text-gray-900 text-white px-2 py-0.5 rounded-full font-medium">
-                  {totalItens}
-                </span>
-              )}
-            </button>
-
-            {carrinhoAberto && (
-              <div className="mt-2 space-y-2 pl-1">
-                {carrinho.length === 0 ? (
-                  <p className="text-xs text-gray-400 dark:text-gray-500 py-2 px-2">Carrinho vazio</p>
-                ) : (
-                  carrinho.map((item) => (
-                    <div key={item.id_produto} className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                      <div className="w-10 h-10 rounded-md overflow-hidden shrink-0 bg-gray-100 dark:bg-gray-700">
-                        {item.imagem_url ? (
-                          <img src={item.imagem_url} alt={item.nome_produto} className="w-full h-full object-cover" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-lg">📦</div>
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium text-gray-700 dark:text-gray-200 truncate">{item.nome_produto}</p>
-                        <div className="flex items-center gap-1 mt-1">
-                          <button onClick={() => alterarQuantidade(item.id_produto, -1)} className="w-5 h-5 flex items-center justify-center bg-gray-200 dark:bg-gray-700 rounded text-xs hover:bg-gray-300 dark:hover:bg-gray-600 transition">-</button>
-                          <span className="text-xs font-semibold w-4 text-center">{item.quantidade}</span>
-                          <button onClick={() => alterarQuantidade(item.id_produto, 1)} className="w-5 h-5 flex items-center justify-center bg-gray-200 dark:bg-gray-700 rounded text-xs hover:bg-gray-300 dark:hover:bg-gray-600 transition">+</button>
-                        </div>
-                      </div>
-                      <button onClick={() => removerDoCarrinho(item.id_produto)} className="text-gray-300 hover:text-red-400 transition text-xs shrink-0">✕</button>
-                    </div>
-                  ))
-                )}
-              </div>
-            )}
-          </div>
 
           {/* Filtros */}
           <div className="flex flex-col gap-3">
@@ -282,20 +199,6 @@ export function Home() {
         </div>
 
         <div className="flex items-center gap-3 shrink-0">
-          <button
-            onClick={() => { setMenuAberto(true); setCarrinhoAberto(true) }}
-            className="relative p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1.5 6h13M10 19a1 1 0 100 2 1 1 0 000-2zm7 0a1 1 0 100 2 1 1 0 000-2z" />
-            </svg>
-            {totalItens > 0 && (
-              <span className="absolute -top-1 -right-1 text-xs bg-gray-900 dark:bg-white dark:text-gray-900 text-white w-4 h-4 rounded-full flex items-center justify-center">
-                {totalItens}
-              </span>
-            )}
-          </button>
-
           {estaLogado ? (
             <button onClick={logout} className="text-sm text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition px-3 py-2">Sair</button>
           ) : (
@@ -330,7 +233,6 @@ export function Home() {
                 </button>
               </div>
 
-              {/* Repare que aqui iteramos sobre o estado que veio direto do hook! */}
               {Object.entries(categoriasAgrupadas).map(([grupo, itens]) => (
                 <div key={grupo} className="break-inside-avoid mb-8 flex flex-col gap-3">
                   <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">{grupo}</h3>
@@ -420,72 +322,51 @@ export function Home() {
 
         {!carregando && !erro && produtos.length > 0 && (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
-            {produtos.map((produto) => {
-              const noCarrinho = carrinho.find((i) => i.id_produto === produto.id_produto)
-              const emFeedback = feedbackId === produto.id_produto
-              return (
-                <div
-                  key={produto.id_produto}
-                  className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden hover:shadow-md transition flex flex-col"
-                >
-                  <div className="bg-gray-100 dark:bg-gray-800 h-40 flex items-center justify-center overflow-hidden">
-                    {produto.imagem_url ? (
-                      <img src={produto.imagem_url} alt={produto.nome_produto} className="w-full h-full object-cover" />
-                    ) : (
-                      <svg xmlns="http://www.w3.org/2000/svg" className="w-10 h-10 text-gray-300 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10" />
-                      </svg>
-                    )}
-                  </div>
-
-                  <div className="p-4 flex flex-col gap-3 flex-1">
-                    <div>
-                      <span className="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-wide">
-                        {formatarCategoria(produto.categoria_produto)}
-                      </span>
-                      <p className="text-sm font-medium text-gray-800 dark:text-gray-200 mt-0.5 line-clamp-2">
-                        {produto.nome_produto}
-                      </p>
-                    </div>
-
-                    <div className="flex gap-2 mt-auto">
-                      <button
-                        onClick={() => navegar(`/produtos/${produto.id_produto}`)}
-                        className="flex-1 text-xs bg-gray-900 dark:bg-white dark:text-gray-900 text-white py-2 rounded-xl font-medium hover:opacity-80 transition"
-                      >
-                        Ver mais
-                      </button>
-                      <button
-                        onClick={() => adicionarAoCarrinho(produto)}
-                        className={`relative p-2 border rounded-xl transition ${
-                          emFeedback
-                            ? 'border-green-400 bg-green-50 dark:bg-green-900/30'
-                            : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800'
-                        }`}
-                      >
-                        {noCarrinho && (
-                          <span className="absolute -top-1.5 -right-1.5 text-xs bg-gray-900 dark:bg-white dark:text-gray-900 text-white w-4 h-4 rounded-full flex items-center justify-center">
-                            {noCarrinho.quantidade}
-                          </span>
-                        )}
-                        <svg xmlns="http://www.w3.org/2000/svg" className={`w-4 h-4 ${emFeedback ? 'text-green-500' : 'text-gray-500 dark:text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1.5 6h13M10 19a1 1 0 100 2 1 1 0 000-2zm7 0a1 1 0 100 2 1 1 0 000-2z" />
-                        </svg>
-                      </button>
-                    </div>
-
-                    {eGerente && (
-                      <button
-                        onClick={() => navegar(`/produtos/${produto.id_produto}/editar`)}
-                        className="text-xs text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition text-center"
-                      >
-                        Editar
-                      </button>
-                    )}
-                  </div>
+            {produtos.map((produto) => (
+              <div
+                key={produto.id_produto}
+                className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden hover:shadow-md transition flex flex-col"
+              >
+                <div className="bg-gray-100 dark:bg-gray-800 h-40 flex items-center justify-center overflow-hidden">
+                  {produto.imagem_url ? (
+                    <img src={produto.imagem_url} alt={produto.nome_produto} className="w-full h-full object-cover" />
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-10 h-10 text-gray-300 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10" />
+                    </svg>
+                  )}
                 </div>
-              )
-            })}
+
+                <div className="p-4 flex flex-col gap-3 flex-1">
+                  <div>
+                    <span className="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-wide">
+                      {formatarCategoria(produto.categoria_produto)}
+                    </span>
+                    <p className="text-sm font-medium text-gray-800 dark:text-gray-200 mt-0.5 line-clamp-2">
+                      {produto.nome_produto}
+                    </p>
+                  </div>
+
+                  <div className="mt-auto">
+                    <button
+                      onClick={() => navegar(`/produtos/${produto.id_produto}`)}
+                      className="w-full text-xs bg-gray-900 dark:bg-white dark:text-gray-900 text-white py-2 rounded-xl font-medium hover:opacity-80 transition"
+                    >
+                      Ver mais
+                    </button>
+                  </div>
+
+                  {eGerente && (
+                    <button
+                      onClick={() => navegar(`/produtos/${produto.id_produto}/editar`)}
+                      className="text-xs text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition text-center mt-2"
+                    >
+                      Editar
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
         )}
 
