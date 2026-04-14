@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import api from '../services/api'
-import type { Produto } from '../types'
+import type { Produto } from '../types/types'
 
 export function useProdutos(
   pagina: number = 1,

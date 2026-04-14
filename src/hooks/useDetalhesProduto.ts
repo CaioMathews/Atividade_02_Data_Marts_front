@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import api from '../services/api'
-import type { DetalhesProduto } from '../types'
+import type { DetalhesProduto } from '../types/types'
 
 export function useDetalhesProduto(id_produto: string) {
   const [produto, setProduto] = useState<DetalhesProduto | null>(null)

@@ -22,6 +22,7 @@ export interface AvaliacaoPedido {
 export interface DetalhesProduto extends Produto {
   total_avaliacoes: number
   media_avaliacao: number | null
+  total_vendas: number 
   avaliacoes: AvaliacaoPedido[]
 }
 

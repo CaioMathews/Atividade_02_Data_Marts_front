@@ -87,8 +87,16 @@ export function DetalhesProduto() {
             <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 dark:text-white leading-tight mb-6">
               {produto.nome_produto}
             </h1>
+              <div className="grid grid-cols-2 gap-4 text-sm bg-slate-50 dark:bg-zinc-800/50 rounded-3xl p-6 border border-slate-100 dark:border-zinc-800">
+              
+              {/*Bloco de Vendas em destaque */}
+              <div className="flex flex-col col-span-2 border-b border-slate-200 dark:border-zinc-700 pb-4 mb-2">
+                <span className="text-[10px] font-bold text-indigo-500 uppercase tracking-widest">Unidades Vendidas</span>
+                <span className="font-black text-2xl text-indigo-600 dark:text-indigo-400">
+                  {produto.total_vendas !== undefined ? produto.total_vendas : 0} <span className="text-sm font-normal text-slate-400 dark:text-zinc-500">unidades</span>
+                </span>
+              </div>
 
-            <div className="grid grid-cols-2 gap-4 text-sm bg-slate-50 dark:bg-zinc-800/50 rounded-3xl p-6 border border-slate-100 dark:border-zinc-800">
               {produto.peso_produto_gramas ? (
                 <div className="flex flex-col">
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Peso</span>
@@ -117,11 +125,11 @@ export function DetalhesProduto() {
                 </div>
               ) : <div className="hidden"></div>}
 
-              {/* Se o produto não tiver nenhuma medida cadastrada */}
               {!produto.peso_produto_gramas && !produto.comprimento_centimetros && !produto.altura_centimetros && !produto.largura_centimetros && (
                 <div className="col-span-2 text-slate-400 text-xs font-medium italic">Nenhuma dimensão cadastrada.</div>
               )}
             </div>
+            
           </div>
         </section>
 

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import api from '../services/api'
-import type { LoginEntrada } from '../types'
+import type { LoginEntrada } from '../types/types'
 
 export function useAuth() {
   const [carregando, setCarregando] = useState(false)
