@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import api from '../services/api'
 
 export function useCategorias() {
-  const [categorias, setCategorias] = useState<string[]>([])
+  const [categoriasAgrupadas, setCategoriasAgrupadas] = useState<Record<string, string[]>>({})
   const [carregandoCategorias, setCarregandoCategorias] = useState(true)
 
   useEffect(() => {
@@ -10,10 +10,10 @@ export function useCategorias() {
       try {
         setCarregandoCategorias(true)
         const resposta = await api.get('/produtos/categorias')
-        setCategorias(resposta.data)
+        setCategoriasAgrupadas(resposta.data)
       } catch (error) {
         console.error("Erro ao carregar categorias", error)
-        setCategorias([]) 
+        setCategoriasAgrupadas({}) 
       } finally {
         setCarregandoCategorias(false)
       }
@@ -22,5 +22,5 @@ export function useCategorias() {
     buscarCategorias()
   }, [])
 
-  return { categorias, carregandoCategorias }
+  return { categoriasAgrupadas, carregandoCategorias }
 }

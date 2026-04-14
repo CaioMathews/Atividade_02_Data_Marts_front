@@ -5,7 +5,6 @@ import { useUsuarioAtual } from '../../hooks/useUsuarioAtual'
 import { useCategorias } from '../../hooks/useCategorias'
 import type { Produto } from '../../types'
 
-
 const formatarCategoria = (cat: string) =>
   cat.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())
 
@@ -20,7 +19,6 @@ export function Home() {
   const { eGerente, estaLogado } = useUsuarioAtual()
 
   const [pagina, setPagina] = useState(1)
-
   const [busca, setBusca] = useState('')
   const [buscaDebounced, setBuscaDebounced] = useState('')
   const [categoriaSelecionada, setCategoriaSelecionada] = useState('')
@@ -28,11 +26,12 @@ export function Home() {
   const [avaliacaoMinima, setAvaliacaoMinima] = useState(0)
 
   const [menuAberto, setMenuAberto] = useState(false)
+  const [megaMenuAberto, setMegaMenuAberto] = useState(false)
   const [carrinhoAberto, setCarrinhoAberto] = useState(false)
   const [carrinho, setCarrinho] = useState<ItemCarrinho[]>([])
   const [feedbackId, setFeedbackId] = useState<string | null>(null)
 
-  const { categorias } = useCategorias()
+  const { categoriasAgrupadas } = useCategorias()
 
   useEffect(() => {
     const t = setTimeout(() => {
@@ -305,39 +304,65 @@ export function Home() {
         </div>
       </header>
 
-      {/* ── BARRA DE CATEGORIAS ───────────────────────────────────────────── */}
-      <div className="bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 px-6 py-3 shrink-0">
-        <div className="flex items-center gap-2 overflow-x-auto pb-2">
-          <button
-            onClick={() => selecionarCategoria('')}
-            className={`shrink-0 text-xs px-4 py-1.5 rounded-full font-medium transition whitespace-nowrap
-              ${categoriaSelecionada === ''
-                ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900'
-                : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
-              }`}
-          >
-            Todas
-          </button>
-          {categorias.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => selecionarCategoria(cat)}
-              className={`shrink-0 text-xs px-4 py-1.5 rounded-full font-medium transition whitespace-nowrap
-                ${categoriaSelecionada === cat
-                  ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900'
-                  : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
-                }`}
-            >
-              {formatarCategoria(cat)}
-            </button>
-          ))}
-        </div>
+      {/* ── MEGA MENU DE CATEGORIAS ───────────────────────────────────────── */}
+      <div className="bg-white dark:bg-[#171d25] border-b border-gray-100 dark:border-gray-800 px-6 py-3 shrink-0 relative z-20">
+        <button
+          onClick={() => setMegaMenuAberto(!megaMenuAberto)}
+          className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 transition"
+        >
+          TODAS AS CATEGORIAS
+          <svg xmlns="http://www.w3.org/2000/svg" className={`w-4 h-4 transition-transform ${megaMenuAberto ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+
+        {megaMenuAberto && (
+          <div className="absolute top-full left-0 w-full bg-white dark:bg-[#171d25] text-gray-800 dark:text-gray-300 border-b border-gray-200 dark:border-gray-800 shadow-2xl p-8 transition-all max-h-[75vh] overflow-y-auto">
+            <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 xl:columns-5 gap-8 max-w-7xl mx-auto">
+              
+              <div className="break-inside-avoid mb-8 flex flex-col gap-3">
+                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Geral</h3>
+                <button
+                  onClick={() => { selecionarCategoria(''); setMegaMenuAberto(false) }}
+                  className={`text-left text-sm hover:text-blue-600 dark:hover:text-white hover:underline transition ${categoriaSelecionada === '' ? 'text-blue-600 dark:text-blue-400 font-bold' : ''}`}
+                >
+                  Todas as Categorias
+                </button>
+              </div>
+
+              {/* Repare que aqui iteramos sobre o estado que veio direto do hook! */}
+              {Object.entries(categoriasAgrupadas).map(([grupo, itens]) => (
+                <div key={grupo} className="break-inside-avoid mb-8 flex flex-col gap-3">
+                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">{grupo}</h3>
+                  {itens.map((cat) => (
+                    <button
+                      key={cat}
+                      onClick={() => { selecionarCategoria(cat); setMegaMenuAberto(false) }}
+                      className={`text-left text-sm hover:text-blue-600 dark:hover:text-white hover:underline transition ${categoriaSelecionada === cat ? 'text-blue-600 dark:text-blue-400 font-bold' : ''}`}
+                    >
+                      {formatarCategoria(cat)}
+                    </button>
+                  ))}
+                </div>
+              ))}
+            </div>
+
+            <div className="flex justify-end mt-8 border-t border-gray-100 dark:border-gray-800 pt-4 max-w-7xl mx-auto">
+              <button
+                onClick={() => setMegaMenuAberto(false)}
+                className="text-sm font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center gap-1"
+              >
+                Recolher
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" /></svg>
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ── CONTEÚDO ──────────────────────────────────────────────────────── */}
       <main className="flex-1 overflow-y-auto p-6">
 
-        {/* Contador + indicador de filtros ativos */}
         {!carregando && !erro && (
           <div className="flex items-center justify-between mb-5">
             <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -353,7 +378,6 @@ export function Home() {
             </p>
             {isFiltrado && (
               <div className="flex items-center gap-3">
-                {/* Badges dos filtros ativos */}
                 <div className="flex items-center gap-1.5">
                   {categoriaSelecionada && (
                     <span className="text-xs bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-2.5 py-1 rounded-full flex items-center gap-1">
