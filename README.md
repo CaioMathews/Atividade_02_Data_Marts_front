@@ -1,73 +1,136 @@
-# React + TypeScript + Vite
+# Backend — Sistema de Compras Online
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+API REST construída com **FastAPI** e **SQLite**, utilizando SQLAlchemy como ORM e Alembic para migrations.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Requisitos
 
-## React Compiler
+- Python 3.11+
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## Instalação
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+**1. Crie e ative um ambiente virtual**
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+python -m venv venv
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Windows:
+```bash
+venv\Scripts\activate
+```
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+**2. Instale as dependências**
+
+```bash
+pip install -r requirements.txt
+```
+
+**3. Configure as variáveis de ambiente**
+
+Copie o arquivo de exemplo e ajuste se necessário:
+Crie um arquivo .env na raiz do backend baseado no arquivo .env.example.
+⚠️ IMPORTANTE: Você deve obrigatoriamente definir uma SECRET_KEY= dentro do seu arquivo .env
+---
+
+## Banco de dados
+
+### Criar as tabelas
+
+```bash
+alembic upgrade head
+```
+
+Este comando lê os arquivos dentro de `alembic/versions/` e cria todas as tabelas no banco.
+
+### Ver o estado atual
+
+```bash
+alembic current
+```
+
+---
+### Adicionar csv
+
+Criar a pasta csv (Atividade_02_Data_Marts\csv) e colocar todos os csv nela
+
+### População do Banco de Dados (Seed)
+
+Execute os scripts para carregar os dados iniciais dos arquivos CSV 
+```bash
+python -m app.scripts.seed
+python -m app.scripts.seed_imagens
+```
+
+## Rodando a API
+
+```bash
+uvicorn app.main:app --reload
+```
+
+A API estará disponível em: [http://localhost:8000](http://localhost:8000)
+
+
+---
+## 💻 Configuração do Frontend
+Para rodar a interface do usuário, utilize o terminal na pasta raiz do frontend:
+
+### 1. Instalação das Dependências
+Utilize o pnpm para instalar os pacotes necessários:
+
+```bash
+pnpm install
+```
+
+### 2. Execução do Projeto
+Inicie o servidor de desenvolvimento do Vite:
+
+```bash
+pnpm dev
+```
+
+OBS: o back está no repositorio 
+https://github.com/CaioMathews/Atividade_02_Data_Marts.git 
+
+## Estrutura do projeto
+
+```
+backend/
+├── app/
+│   ├── main.py              # Ponto de entrada da aplicação
+│   ├── database.py          # Configuração do banco de dados
+│   ├── config.py            # Variáveis de ambiente
+│   ├── models/              # Models do SQLAlchemy 
+│   │   ├── consumidor.py
+│   │   ├── produto.py
+│   │   ├── vendedor.py
+│   │   ├── pedido.py
+│   │   ├── item_pedido.py
+│   │   └── avaliacao_pedido.py
+│   ├── schemas/             # Schemas do Pydantic
+│   │   ├── consumidor.py
+│   │   ├── produto.py
+│   │   ├── vendedor.py
+│   │   ├── pedido.py
+│   │   ├── item_pedido.py
+│   │   └── avaliacao_pedido.py
+│   ├── routers/             # Rotas da API
+│   │   ├── consumidores.py
+│   │   ├── produtos.py
+│   │   ├── vendedores.py
+│   │   ├── pedidos.py
+│   │   ├── itens_pedidos.py
+│   │   └── avaliacoes_pedidos.py
+│   └── scripts/             # Scripts de população (seed)
+├── alembic/
+│   ├── env.py               # Configuração do Alembic
+│   └── versions/            # Arquivos de migration
+├── csv/                     # Arquivos .csv para o seed
+├── alembic.ini              # Configuração principal do Alembic
+├── requirements.txt
+└── .env.example
 ```
